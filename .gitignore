@@ -2,4 +2,4 @@
 */target/**
 
 # Ignore Cargo.lock files
-Cargo.lock
+*/Cargo.lock
