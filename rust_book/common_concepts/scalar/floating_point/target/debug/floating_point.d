@@ -1,0 +1,1 @@
+/Users/shaiksadiqahmed.ejas/gitprojects/learn-rust/rust_book/common_concepts/scalar/floating_point/target/debug/floating_point: /Users/shaiksadiqahmed.ejas/gitprojects/learn-rust/rust_book/common_concepts/scalar/floating_point/src/main.rs
