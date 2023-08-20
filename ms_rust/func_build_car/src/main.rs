@@ -30,7 +30,6 @@ fn car_factory(color: String, transmission: Transmission, convertible: bool) -> 
         mileage: 0
     }
 }
-
 fn main() {
     // We have orders for three new cars!
     // We'll declare a mutable car variable and reuse it for all the cars
