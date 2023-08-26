@@ -4,6 +4,11 @@ use std::net::{ TcpListener, TcpStream };
 use std::io::{ Read, Write };
 use std::env;
 
+
+use tracing_subscriber;
+use std::{error::Error, io};
+use tracing::{debug, error, info, span, warn, Level};
+
 #[macro_use]
 extern crate serde_derive;
 
@@ -25,15 +30,17 @@ const INTERNAL_SERVER_ERROR: &str = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\n\r\n"
 
 //main function
 fn main() {
+
+    tracing_subscriber::fmt::init();
     //Set database
     if let Err(e) = set_database() {
-        println!("Error: {}", e);
+        tracing::error!("Error setting up database: {e}");
         return;
     }
 
     //start server and print port
     let listener = TcpListener::bind(format!("0.0.0.0:8080")).unwrap();
-    println!("Server started at port 8080");
+    info!("Tracing::info Server started at port 8080");
 
     //handle the client
     for stream in listener.incoming() {
@@ -42,7 +49,7 @@ fn main() {
                 handle_client(stream);
             }
             Err(e) => {
-                println!("Error: {}", e);
+                tracing::error!("Error in streaming the listener: {e}");
             }
         }
     }
@@ -69,7 +76,7 @@ fn handle_client(mut stream: TcpStream) {
             stream.write_all(format!("{}{}", status_line, content).as_bytes()).unwrap();
         }
         Err(e) => {
-            println!("Error: {}", e);
+            tracing::error!("Error in handle_client function: {e}");
         }
     }
 }

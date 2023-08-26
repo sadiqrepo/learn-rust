@@ -3,3 +3,7 @@ target/
 
 # Ignore Cargo.lock files
 Cargo.lock
+
+
+# Ignore .idea files
+.idea
