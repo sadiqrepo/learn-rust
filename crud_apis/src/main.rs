@@ -6,8 +6,8 @@ use std::env;
 
 
 use tracing_subscriber;
-use std::{error::Error, io};
-use tracing::{debug, error, info, span, warn, Level};
+use tracing::{error, info};
+
 
 #[macro_use]
 extern crate serde_derive;
@@ -34,7 +34,7 @@ fn main() {
     tracing_subscriber::fmt::init();
     //Set database
     if let Err(e) = set_database() {
-        tracing::error!("Error setting up database: {e}");
+        error!("Error setting up database: {e}");
         return;
     }
 
@@ -49,7 +49,7 @@ fn main() {
                 handle_client(stream);
             }
             Err(e) => {
-                tracing::error!("Error in streaming the listener: {e}");
+                error!("Error in streaming the listener: {e}");
             }
         }
     }
@@ -76,7 +76,7 @@ fn handle_client(mut stream: TcpStream) {
             stream.write_all(format!("{}{}", status_line, content).as_bytes()).unwrap();
         }
         Err(e) => {
-            tracing::error!("Error in handle_client function: {e}");
+            error!("Error in handle_client function: {e}");
         }
     }
 }
@@ -84,7 +84,7 @@ fn handle_client(mut stream: TcpStream) {
 //CONTROLLERS
 
 //handle_post_request function
-fn handle_post_request(request: &str) -> (String, String) {
+/* fn handle_post_request(request: &str) -> (String, String) {
     match (get_user_request_body(&request), Client::connect(DB_URL, NoTls)) {
         (Ok(user), Ok(mut client)) => {
             client
@@ -98,6 +98,27 @@ fn handle_post_request(request: &str) -> (String, String) {
         }
         _ => (INTERNAL_SERVER_ERROR.to_string(), "Error".to_string()),
     }
+}  */
+
+fn handle_post_request(request: &str) -> (String, String) {
+    let user = match get_user_request_body(request) {
+        Ok(user) => user,
+        _ => return (INTERNAL_SERVER_ERROR.to_string(), "Error".to_string()),
+    };
+
+    let mut client = match Client::connect(DB_URL, NoTls) {
+        Ok(client) => client,
+        _ => return (INTERNAL_SERVER_ERROR.to_string(), "Error".to_string()),
+    };
+
+    if let Err(_) = client.execute(
+        "INSERT INTO users (name, email) VALUES ($1, $2)",
+        &[&user.name, &user.email],
+    ) {
+        return (INTERNAL_SERVER_ERROR.to_string(), "Error".to_string());
+    }
+
+    (OK_RESPONSE.to_string(), "User created".to_string())
 }
 
 //handle_get_request function
